@@ -20,6 +20,7 @@ public class HAL implements ReversiPlayer {
 		private long timeout;
 		protected int maxdepth;
 		protected int traveldepth;
+		private final int passvalue = 100;
 		/**
 		 * Konstruktor, der bei der Gründung eines Bots eine Meldung auf den
 		 * Bildschirm ausgibt.
@@ -83,64 +84,80 @@ public class HAL implements ReversiPlayer {
 		 */
 		private int getWeight(GameBoard gb, Coordinates last, int depth, int mobility) {
 			if(last == null) return 0;
-			double totalstones = (gb.countStones(color)+gb.countStones(othercolor));
-			double diff = 0.5;//totalstones/64;
+			int totalstones = (gb.countStones(color)+gb.countStones(othercolor));
 			int col = last.getCol(), row = last.getRow();
-			int weight = mobility/2;
 			
-			//if early game
-			if(totalstones < 40)
-				diff = -diff;
 			
-			//if end game
-			if(totalstones > 55)
-				diff = 3*diff;
-			
+			int mobilityAdvantage = mobility;
+			int mA = (128 - totalstones)/64; //the coefficient for the mobilityAdvantage
 			
 			//number of tiles
-			weight += (gb.countStones(color)-gb.countStones(othercolor))*diff;
+			int occupiedSquareAdvantage = (gb.countStones(color)-gb.countStones(othercolor));
+			int oSA; //the coefficient for the OccupiedSquareAdvantage
+			
+			int fieldAdvantage = 0;
+			int fA = 1; //the coefficient for the fieldAdvantage
+			
+			if(totalstones < 10){
+				oSA = -(100 - totalstones)/50; //9 < oSA < 10 => 0 < occupiedSquareAdvantage 140
+			}else{
+				if(totalstones <20){
+					oSA = -(90 - 2*(totalstones-10))/50;  //7 < oSA < 9 => 0 < occupiedSquareAdvantage 220
+				}else{
+					if(totalstones < 40){
+						oSA = -(60 - 3*(totalstones-20))/50;  //0 < oSA < 6 => 0 < occupiedSquareAdvantage 400
+					}else{
+						if(totalstones < 50){
+							oSA = -(50 - 5*(totalstones-40))/50;  //0 < oSA < 7 => 0 < occupiedSquareAdvantage 350
+						}else
+							oSA = 3;
+						
+					}
+				}
+			}
+			
+			
 			
 			
 			/*weight of fields:
 			 64  -8  8  6  6  8  -8 64
 			 -8 -24 -4 -3 -3 -4 -24 -8
 			  8  -4  7  4  4  7  -4  8
-			  6  -3  4  0  0  4  -3  8
-			  6  -3  4  0  0  4  -3  8
+			  6  -3  4  0  0  4  -3  6
+			  6  -3  4  0  0  4  -3  6
 			  8  -4  7  4  4  7  -4  8
 			 -8 -24 -4 -3 -3 -4 -24 -8
 			 64  -8  8  6  6  8  -8 64
 			*/
 			
-			//position
 			switch (col){
 				case 1: col = 8;
 				case 8: 
 					if(row == 1 || row == 8)
-						weight += 64;
+						fieldAdvantage += 64;
 					else {
 						if(row == 2 || row == 7)
-							weight += -8;
+							fieldAdvantage += -8;
 						else {
 							if(row == 3 || row == 6)
-								weight += 8;
+								fieldAdvantage += 8;
 							else
-								weight += 6;
+								fieldAdvantage += 6;
 						}
 					}
 					break;
 				case 2: col = 7;
 				case 7: 
 					if(row == 1 || row == 8)
-						weight += -8;
+						fieldAdvantage += -8;
 					else {
 						if(row == 2 || row == 7)
-							weight += -24;
+							fieldAdvantage += -24;
 						else {
 							if(row == 3 || row == 6)
-								weight += -4;
+								fieldAdvantage += -4;
 							else
-								weight += -3;
+								fieldAdvantage += -3;
 						}
 					}
 			
@@ -148,37 +165,41 @@ public class HAL implements ReversiPlayer {
 				case 3: col = 6;
 				case 6: 
 					if(row == 1 || row == 8)
-						weight += 8;
+						fieldAdvantage += 8;
 					else{
 						if(row == 2 || row == 7)
-							weight += -4;
+							fieldAdvantage += -4;
 						else {
 							if(row == 3 || row == 6)
-								weight += 7;
+								fieldAdvantage += 7;
 							else
-								weight += 4;
+								fieldAdvantage += 4;
 						}
 					}
 					break;
 				case 4: col = 5;
 				case 5: 
 					if(row == 1 || row == 8)
-						weight += 6;
+						fieldAdvantage += 6;
 					else{
 						if(row == 2 || row == 7)
-							weight += -3;
+							fieldAdvantage += -3;
 						else {
 							if(row == 3 || row == 6)
-								weight += 4;
+								fieldAdvantage += 4;
 							else
-								weight += 0;
+								fieldAdvantage += 0;
 						}
 					}
 					break;
 				default:
-					weight += 0;
+					fieldAdvantage += 0;
 			}
-
+			
+			
+			int weight = (int) (fieldAdvantage*fA + occupiedSquareAdvantage*oSA + mobilityAdvantage*mA);
+			//System.out.println("fieldAdvantage: \t" + fieldAdvantage+ " fA: \t" + fA+ " occupiedSquareAdvantage: \t"+ occupiedSquareAdvantage + " oSA: \t" + oSA +" mobilityAdvantage: \t"+ mobilityAdvantage + " mA: \t" + mA);
+			//System.out.println("weight total: \t" + weight);
 			return weight;
 		}
 		
@@ -198,15 +219,17 @@ public class HAL implements ReversiPlayer {
 				throw new RuntimeException("time ran out");
 			}
 
-			ArrayList<Coordinates> possible = possibleMoves(gb, color);	
+			int possibleMax = possibleMoves(gb, color).size();	
+
+			ArrayList<Coordinates> possible = possibleMoves(gb, othercolor);
 			
 			if(depth == traveldepth){
-				return getWeight(gb, last, depth, possible.size()); //go back up from here
+				return getWeight(gb, last, depth, possibleMax-possible.size()); //go back up from here
 			}
-			possible = possibleMoves(gb, othercolor);
+			
 			
 			if(possible.isEmpty()){
-				return -64;
+				return passvalue;
 			}
 
 			GameBoard test;
@@ -259,14 +282,16 @@ public class HAL implements ReversiPlayer {
 				throw new RuntimeException("time ran out");
 			}
 
+			int possibleMin = possibleMoves(gb, othercolor).size();	
+
 			ArrayList<Coordinates> possible = possibleMoves(gb, color);
 			
 			if(depth == traveldepth){
-				return getWeight(gb, last, depth, possible.size()); //go back up from here
+				return getWeight(gb, last, depth, possibleMin - possible.size()); //go back up from here
 			}
 
 			if(possible.isEmpty()){
-				return -64;
+				return passvalue;
 			}
 			
 			GameBoard test;
@@ -465,5 +490,4 @@ public class HAL implements ReversiPlayer {
 			return tmp;
 		}
 }
-
 
