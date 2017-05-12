@@ -56,7 +56,6 @@ public class HAL implements ReversiPlayer {
 		}
 		
 		/**
-		 * 
 		 * @param GameBoard gb
 		 * @return a list of all possible moves
 		 */
@@ -67,7 +66,7 @@ public class HAL implements ReversiPlayer {
 				for(int j=1; j<9; j++){
 					result = new Coordinates(i, j);
 					if(gb.checkMove(movecolor, result)){
-						possible.add(result); //return the result, no need to keep checking
+						possible.add(result);
 					}
 				}
 			}
@@ -77,7 +76,6 @@ public class HAL implements ReversiPlayer {
 		
 		
 		/**
-		 * 
 		 * @param the Gameboard gb
 		 * @param the current move (that we plan on making)
 		 * @return how good the move is (+inf == very good, -inf == shit)
@@ -93,31 +91,29 @@ public class HAL implements ReversiPlayer {
 			
 			//number of tiles
 			int occupiedSquareAdvantage = (gb.countStones(color)-gb.countStones(othercolor));
-			int oSA; //the coefficient for the OccupiedSquareAdvantage
+			double oSA; //the coefficient for the OccupiedSquareAdvantage
 			
 			int fieldAdvantage = 0;
-			int fA = 1; //the coefficient for the fieldAdvantage
+			double fA = 1.5; //the coefficient for the fieldAdvantage
 			
 			if(totalstones < 10){
-				oSA = -(100 - totalstones)/50; //9 < oSA < 10 => 0 < occupiedSquareAdvantage 140
+				oSA = -(100 - totalstones)/30.0; //9 < oSA < 10 => 0 < occupiedSquareAdvantage 140
 			}else{
 				if(totalstones <20){
-					oSA = -(90 - 2*(totalstones-10))/50;  //7 < oSA < 9 => 0 < occupiedSquareAdvantage 220
+					oSA = -(90 - 2*(totalstones-10))/30.0;  //7 < oSA < 9 => 0 < occupiedSquareAdvantage 220
 				}else{
 					if(totalstones < 40){
-						oSA = -(60 - 3*(totalstones-20))/50;  //0 < oSA < 6 => 0 < occupiedSquareAdvantage 400
+						oSA = -(90 - 3*(totalstones-20))/30.0;  //3 < oSA < 6 => 0 < occupiedSquareAdvantage 400
 					}else{
 						if(totalstones < 50){
-							oSA = -(50 - 5*(totalstones-40))/50;  //0 < oSA < 7 => 0 < occupiedSquareAdvantage 350
+							oSA = -(50 - 5*(totalstones-40))/50.0;  //0 < oSA < 7 => 0 < occupiedSquareAdvantage 350
 						}else
 							oSA = 3;
 						
 					}
 				}
 			}
-			
-			
-			
+			//System.out.println("oSA: " + oSA + " totalstones: " + totalstones);
 			
 			/*weight of fields:
 			 64  -8  8  6  6  8  -8 64
