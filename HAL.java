@@ -90,11 +90,16 @@ public class HAL implements ReversiPlayer {
 			
 			//if early game
 			if(totalstones < 40)
-				diff = -2*diff;
+				diff = -diff;
 			
 			//if end game
 			if(totalstones > 55)
 				diff = 3*diff;
+			
+			
+			//number of tiles
+			weight += (gb.countStones(color)-gb.countStones(othercolor))*diff;
+			
 			
 			/*weight of fields:
 			 64  -8  8  6  6  8  -8 64
@@ -173,11 +178,7 @@ public class HAL implements ReversiPlayer {
 				default:
 					weight += 0;
 			}
-			//number of tiles
-			weight += (gb.countStones(color)-gb.countStones(othercolor))*diff;
-			
-			//System.out.println("weight: " + weight);
-			
+
 			return weight;
 		}
 		
