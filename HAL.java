@@ -106,14 +106,14 @@ public class HAL implements ReversiPlayer {
 			
 			
 			/*weight of fields:
-			 64  -8  8  6  6  8  -8 64
-			 -8 -24 -4 -3 -3 -4 -24 -8
-			  8  -4  7  4  4  7  -4  8
-			  6  -3  4  0  0  4  -3  6
-			  6  -3  4  0  0  4  -3  6
-			  8  -4  7  4  4  7  -4  8
-			 -8 -24 -4 -3 -3 -4 -24 -8
-			 64  -8  8  6  6  8  -8 64
+			 100  -8  8  6  6  8  -8 100
+			 -8  -44 -4 -3 -3 -4 -44 -8
+			  8   -4  7  4  4  7  -4  8
+			  6   -3  4  0  0  4  -3  6
+			  6   -3  4  0  0  4  -3  6
+			  8   -4  7  4  4  7  -4  8
+			 -8  -44 -4 -3 -3 -4 -44 -8
+			 100   -8  8  6  6  8  -8 100
 			*/
 			
 			//position
@@ -122,7 +122,7 @@ public class HAL implements ReversiPlayer {
 				case 8: 
 					if(row == 1 || row == 8){
 						//Corner
-						weight += 64;
+						weight += 100;
 					}else {
 						if(row == 2 || row == 7){
 							//C Square
@@ -146,7 +146,7 @@ public class HAL implements ReversiPlayer {
 					}else {
 						if(row == 2 || row == 7){
 							//X Square
-							weight += -24;
+							weight += -44;
 						}else {
 							if(row == 3 || row == 6)
 								weight += -4;
@@ -204,9 +204,9 @@ public class HAL implements ReversiPlayer {
 		 * @return
 		 */
 		private boolean checkPrune(GameBoard gb, Coordinates move, int totalstones, int color){
-			int othercolor = gb.GREEN;
-			if(color == gb.GREEN)
-				othercolor = gb.RED;
+			int othercolor = GameBoard.GREEN;
+			if(color == GameBoard.GREEN)
+				othercolor = GameBoard.RED;
 			int row = move.getRow();
 			int col = move.getCol();
 			
@@ -453,9 +453,13 @@ public class HAL implements ReversiPlayer {
 				test = gb.clone(); //make a new copy of the board
 				
 				//should We prune
-				if(checkPrune(test, possible.get(i), (gb.countStones(color)+gb.countStones(othercolor)), othercolor))
-					if(++i >= possible.size())
+				if(checkPrune(test, possible.get(i), (gb.countStones(color)+gb.countStones(othercolor)), othercolor)){
+					//System.out.println("Pruning!");
+					if(++i >= possible.size()){
+						//System.out.println("Pruning and breaking!");
 						break;
+					}
+				}
 				
 				if(!test.checkMove(othercolor, possible.get(i))) System.err.println(tab(depth)+"Whoops, move don't work"); //test the move
 
@@ -518,9 +522,13 @@ public class HAL implements ReversiPlayer {
 				test = gb.clone(); //make a new copy of the board
 
 				//should We prune
-				if(checkPrune(test, possible.get(i), (gb.countStones(color)+gb.countStones(othercolor)), color))
-					if(++i >= possible.size())
+				if(checkPrune(test, possible.get(i), (gb.countStones(color)+gb.countStones(othercolor)), color)){
+					//System.out.println("Pruning!");
+					if(++i >= possible.size()){
+						//System.out.println("Pruning and breaking!");
 						break;
+					}
+				}
 				
 				if(!test.checkMove(color, possible.get(i))) System.err.println(tab(depth)+"Whoops, move don't work"); //test the move
 				
@@ -561,7 +569,7 @@ public class HAL implements ReversiPlayer {
 		 * @return
 		 * @throws RuntimeException
 		 */
-	private int endgamesearch(GameBoard gb, long start, int alpha, int beta, int depth, int color)  throws RuntimeException{
+		private int endgamesearch(GameBoard gb, long start, int alpha, int beta, int depth, int color)  throws RuntimeException{
 			long timediff = System.currentTimeMillis()-start;
 			if(timediff > timeout-500){
 				throw new RuntimeException("time ran out");
