@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import reversi.Arena;
 import reversi.Coordinates;
 import reversi.GameBoard;
+import reversi.OutOfBoundsException;
 import reversi.ReversiPlayer;
 
 public class HAL implements ReversiPlayer {
@@ -20,7 +21,7 @@ public class HAL implements ReversiPlayer {
 		private long timeout;
 		protected int maxdepth;
 		protected int traveldepth;
-		private final int passvalue = 100;
+		private final int passvalue = -64;
 		/**
 		 * Konstruktor, der bei der Gründung eines Bots eine Meldung auf den
 		 * Bildschirm ausgibt.
@@ -56,6 +57,7 @@ public class HAL implements ReversiPlayer {
 		}
 		
 		/**
+		 * 
 		 * @param GameBoard gb
 		 * @return a list of all possible moves
 		 */
@@ -66,7 +68,7 @@ public class HAL implements ReversiPlayer {
 				for(int j=1; j<9; j++){
 					result = new Coordinates(i, j);
 					if(gb.checkMove(movecolor, result)){
-						possible.add(result);
+						possible.add(result); //return the result, no need to keep checking
 					}
 				}
 			}
@@ -76,6 +78,7 @@ public class HAL implements ReversiPlayer {
 		
 		
 		/**
+		 * 
 		 * @param the Gameboard gb
 		 * @param the current move (that we plan on making)
 		 * @return how good the move is (+inf == very good, -inf == shit)
@@ -83,37 +86,24 @@ public class HAL implements ReversiPlayer {
 		private int getWeight(GameBoard gb, Coordinates last, int depth, int mobility) {
 			if(last == null) return 0;
 			int totalstones = (gb.countStones(color)+gb.countStones(othercolor));
+			double diff = 0.5;//totalstones/64;
 			int col = last.getCol(), row = last.getRow();
+			int weight = mobility/2;
+			
+			//if early game
+			if(totalstones < 40)
+				diff = -2*diff;
+			
+			//if end game
+			if(totalstones > 55)
+				diff = 3*diff;
 			
 			
-			int mobilityAdvantage = mobility;
-			int mA = (128 - totalstones)/64; //the coefficient for the mobilityAdvantage
-			
+
 			//number of tiles
-			int occupiedSquareAdvantage = (gb.countStones(color)-gb.countStones(othercolor));
-			double oSA; //the coefficient for the OccupiedSquareAdvantage
+			weight += (gb.countStones(color)-gb.countStones(othercolor))*diff;
 			
-			int fieldAdvantage = 0;
-			double fA = 1.5; //the coefficient for the fieldAdvantage
 			
-			if(totalstones < 10){
-				oSA = -(100 - totalstones)/30.0; //9 < oSA < 10 => 0 < occupiedSquareAdvantage 140
-			}else{
-				if(totalstones <20){
-					oSA = -(90 - 2*(totalstones-10))/30.0;  //7 < oSA < 9 => 0 < occupiedSquareAdvantage 220
-				}else{
-					if(totalstones < 40){
-						oSA = -(90 - 3*(totalstones-20))/30.0;  //3 < oSA < 6 => 0 < occupiedSquareAdvantage 400
-					}else{
-						if(totalstones < 50){
-							oSA = -(50 - 5*(totalstones-40))/50.0;  //0 < oSA < 7 => 0 < occupiedSquareAdvantage 350
-						}else
-							oSA = 3;
-						
-					}
-				}
-			}
-			//System.out.println("oSA: " + oSA + " totalstones: " + totalstones);
 			
 			/*weight of fields:
 			 64  -8  8  6  6  8  -8 64
@@ -126,77 +116,307 @@ public class HAL implements ReversiPlayer {
 			 64  -8  8  6  6  8  -8 64
 			*/
 			
+			//position
 			switch (col){
 				case 1: col = 8;
 				case 8: 
-					if(row == 1 || row == 8)
-						fieldAdvantage += 64;
-					else {
-						if(row == 2 || row == 7)
-							fieldAdvantage += -8;
-						else {
-							if(row == 3 || row == 6)
-								fieldAdvantage += 8;
-							else
-								fieldAdvantage += 6;
+					if(row == 1 || row == 8){
+						//Corner
+						weight += 64;
+					}else {
+						if(row == 2 || row == 7){
+							//C Square
+							weight += -8;
+						}else {
+							if(row == 3 || row == 6){
+								//A Square
+								weight += 8;
+							}else{
+								//B Square
+								weight += 6;
+							}
 						}
 					}
 					break;
 				case 2: col = 7;
 				case 7: 
-					if(row == 1 || row == 8)
-						fieldAdvantage += -8;
-					else {
-						if(row == 2 || row == 7)
-							fieldAdvantage += -24;
-						else {
+					if(row == 1 || row == 8){
+						//C Square
+						weight += -8;
+					}else {
+						if(row == 2 || row == 7){
+							//X Square
+							weight += -24;
+						}else {
 							if(row == 3 || row == 6)
-								fieldAdvantage += -4;
+								weight += -4;
 							else
-								fieldAdvantage += -3;
+								weight += -3;
 						}
 					}
 			
 					break;
 				case 3: col = 6;
 				case 6: 
-					if(row == 1 || row == 8)
-						fieldAdvantage += 8;
-					else{
+					if(row == 1 || row == 8){
+						//A Square
+						weight += 8;
+					}else{
 						if(row == 2 || row == 7)
-							fieldAdvantage += -4;
+							weight += -4;
 						else {
 							if(row == 3 || row == 6)
-								fieldAdvantage += 7;
+								weight += 7;
 							else
-								fieldAdvantage += 4;
+								weight += 4;
 						}
 					}
 					break;
 				case 4: col = 5;
 				case 5: 
-					if(row == 1 || row == 8)
-						fieldAdvantage += 6;
-					else{
+					if(row == 1 || row == 8){
+						//B Square
+						weight += 6;
+					}else{
 						if(row == 2 || row == 7)
-							fieldAdvantage += -3;
+							weight += -3;
 						else {
 							if(row == 3 || row == 6)
-								fieldAdvantage += 4;
+								weight += 4;
 							else
-								fieldAdvantage += 0;
+								weight += 0;
 						}
 					}
 					break;
 				default:
-					fieldAdvantage += 0;
+					weight += 0;
 			}
 			
+			//System.out.println("weight: " + weight);
 			
-			int weight = (int) (fieldAdvantage*fA + occupiedSquareAdvantage*oSA + mobilityAdvantage*mA);
-			//System.out.println("fieldAdvantage: \t" + fieldAdvantage+ " fA: \t" + fA+ " occupiedSquareAdvantage: \t"+ occupiedSquareAdvantage + " oSA: \t" + oSA +" mobilityAdvantage: \t"+ mobilityAdvantage + " mA: \t" + mA);
-			//System.out.println("weight total: \t" + weight);
 			return weight;
+		}
+		/**
+		 * 
+		 * @param gb
+		 * @param move
+		 * @param totalstones
+		 * @return
+		 */
+		private boolean checkPrune(GameBoard gb, Coordinates move, int totalstones, int color){
+			int othercolor = gb.GREEN;
+			if(color == gb.GREEN)
+				othercolor = gb.RED;
+			int row = move.getRow();
+			int col = move.getCol();
+			
+			//Check if X Square
+			if((row == 2 || row == 7) && (col == 2 || col == 7)){
+				
+				//if the total disc count is 35 or more, never prune
+					if(totalstones >= 35) 
+						return false;
+					
+					if(row == 2){
+						if(col == 2){
+							try {
+								//Otherwise, if the adjacent corner is occupied, do not prune
+								if(gb.getOccupation(new Coordinates(1,1))== 0)
+									return true;
+								//Otherwise, if both adjacent C-Square are occupied, always prune
+								if(gb.getOccupation(new Coordinates(1,2)) != 0 && gb.getOccupation(new Coordinates(2,1)) != 0 )
+									return true;
+								//Otherwise, prune if and only if the total disc count is less than 25
+								if(totalstones < 25)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}else{
+							try {
+								//Otherwise, if the adjacent corner is occupied, do not prune
+								if(gb.getOccupation(new Coordinates(1,8)) == 0)
+									return true;
+								//Otherwise, if both adjacent C-Square are occupied, always prune
+								if(gb.getOccupation(new Coordinates(1,7)) != 0 && gb.getOccupation(new Coordinates(2,8)) != 0 )
+									return true;
+								//Otherwise, prune if and only if the total disc count is less than 25
+								if(totalstones < 25)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}
+					}else{
+						if(col == 2){
+							try {
+								//Otherwise, if the adjacent corner is occupied, do not prune
+								if(gb.getOccupation(new Coordinates(8,1)) == 0)
+									return true;
+								//Otherwise, if both adjacent C-Square are occupied, always prune
+								if(gb.getOccupation(new Coordinates(8,2)) != 0 && gb.getOccupation(new Coordinates(7,1)) != 0 )
+									return true;
+								//Otherwise, prune if and only if the total disc count is less than 25
+								if(totalstones < 25)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}else{
+							try {
+								//Otherwise, if the adjacent corner is occupied, do not prune
+								if(gb.getOccupation(new Coordinates(8,8)) == 0)
+									return true;
+								//Otherwise, if both adjacent C-Square are occupied, always prune
+								if(gb.getOccupation(new Coordinates(8,7)) != 0 && gb.getOccupation(new Coordinates(7,8)) != 0 )
+									return true;
+								//Otherwise, prune if and only if the total disc count is less than 25
+								if(totalstones < 25)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+			}
+			
+			//Check if C Square
+			if((row == 1 && (col == 2 || col == 7)) || (row == 2 && (col == 1 || col == 8)) || (row == 7 && (col == 1 || col == 8)) || (row == 8 && (col == 2 || col == 7))){
+					
+					if(row == 1){
+						if(col == 2){
+							//Coordinates (1,2)
+							try {
+								//the adjacent corner and A square are empty, prune
+								if(gb.getOccupation(new Coordinates(1,1))== 0 && gb.getOccupation(new Coordinates(1,2))== 0)
+									return true;
+								//There is no opponent on the nearest B-Square
+								if(gb.getOccupation(new Coordinates(1,4)) != othercolor)
+									return true;
+								//The total number of discs is less than 28
+								if(totalstones < 28)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}if(col == 7){
+							//Coordinates (1,7)
+							try {
+								//the adjacent corner and A square are empty, prune
+								if(gb.getOccupation(new Coordinates(1,8))== 0 && gb.getOccupation(new Coordinates(1,6))== 0)
+									return true;
+								//There is no opponent on the nearest B-Square
+								if(gb.getOccupation(new Coordinates(1,5)) != othercolor)
+									return true;
+								//The total number of discs is less than 28
+								if(totalstones < 28)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}
+					}if(row == 2){
+						if(col == 1){
+							//Coordinates (2,1)
+							try {
+								//the adjacent corner and A square are empty, prune
+								if(gb.getOccupation(new Coordinates(1,1))== 0 && gb.getOccupation(new Coordinates(3,1))== 0)
+									return true;
+								//There is no opponent on the nearest B-Square
+								if(gb.getOccupation(new Coordinates(4,1)) != othercolor)
+									return true;
+								//The total number of discs is less than 28
+								if(totalstones < 28)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}if(col == 8){
+							//Coordinates (2,8)
+							try {
+								//the adjacent corner and A square are empty, prune
+								if(gb.getOccupation(new Coordinates(1,8))== 0 && gb.getOccupation(new Coordinates(3,8))== 0)
+									return true;
+								//There is no opponent on the nearest B-Square
+								if(gb.getOccupation(new Coordinates(4,8)) != othercolor)
+									return true;
+								//The total number of discs is less than 28
+								if(totalstones < 28)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+					if(row == 7){
+						if(col == 1){
+							//Coordinates (7,1)
+							try {
+								//the adjacent corner and A square are empty, prune
+								if(gb.getOccupation(new Coordinates(8,1))== 0 && gb.getOccupation(new Coordinates(6,1))== 0)
+									return true;
+								//There is no opponent on the nearest B-Square
+								if(gb.getOccupation(new Coordinates(5,1)) != othercolor)
+									return true;
+								//The total number of discs is less than 28
+								if(totalstones < 28)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}if(col == 8){
+							//Coordinates (7,8)
+							try {
+								//the adjacent corner and A square are empty, prune
+								if(gb.getOccupation(new Coordinates(8,8))== 0 && gb.getOccupation(new Coordinates(6,8))== 0)
+									return true;
+								//There is no opponent on the nearest B-Square
+								if(gb.getOccupation(new Coordinates(5,8)) != othercolor)
+									return true;
+								//The total number of discs is less than 28
+								if(totalstones < 28)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}
+					}if(row == 8){
+						if(col == 2){
+							//Coordinates (8,2)
+							try {
+								//the adjacent corner and A square are empty, prune
+								if(gb.getOccupation(new Coordinates(8,1))== 0 && gb.getOccupation(new Coordinates(8,3))== 0)
+									return true;
+								//There is no opponent on the nearest B-Square
+								if(gb.getOccupation(new Coordinates(8,4)) != othercolor)
+									return true;
+								//The total number of discs is less than 28
+								if(totalstones < 28)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}if(col == 7){
+							//Coordinates (8,7)
+							try {
+								//the adjacent corner and A square are empty, prune
+								if(gb.getOccupation(new Coordinates(8,8))== 0 && gb.getOccupation(new Coordinates(8,6))== 0)
+									return true;
+								//There is no opponent on the nearest B-Square
+								if(gb.getOccupation(new Coordinates(8,5)) != othercolor)
+									return true;
+								//The total number of discs is less than 28
+								if(totalstones < 28)
+									return true;
+							} catch (OutOfBoundsException e) {
+								e.printStackTrace();
+							}
+						}
+					}
+			}
+			
+			return false;
+			
 		}
 		
 		/**
@@ -215,14 +435,12 @@ public class HAL implements ReversiPlayer {
 				throw new RuntimeException("time ran out");
 			}
 
-			int possibleMax = possibleMoves(gb, color).size();	
-
-			ArrayList<Coordinates> possible = possibleMoves(gb, othercolor);
+			ArrayList<Coordinates> possible = possibleMoves(gb, color);	
 			
 			if(depth == traveldepth){
-				return getWeight(gb, last, depth, possibleMax-possible.size()); //go back up from here
+				return getWeight(gb, last, depth, possible.size()); //go back up from here
 			}
-			
+			possible = possibleMoves(gb, othercolor);
 			
 			if(possible.isEmpty()){
 				return passvalue;
@@ -233,10 +451,15 @@ public class HAL implements ReversiPlayer {
 			
 			for(int i = 0; i < possible.size(); i++){
 				test = gb.clone(); //make a new copy of the board
+				
+				//should We prune
+				if(checkPrune(test, possible.get(i), (gb.countStones(color)+gb.countStones(othercolor)), othercolor))
+					if(++i >= possible.size())
+						break;
+				
 				if(!test.checkMove(othercolor, possible.get(i))) System.err.println(tab(depth)+"Whoops, move don't work"); //test the move
-				
+
 				test.makeMove(othercolor, possible.get(i)); //make the move
-				
 				tmp = max(test, start, alpha, min, depth+1, possible.get(i));
 				
 				tmp = tmp%1000;
@@ -278,12 +501,10 @@ public class HAL implements ReversiPlayer {
 				throw new RuntimeException("time ran out");
 			}
 
-			int possibleMin = possibleMoves(gb, othercolor).size();	
-
 			ArrayList<Coordinates> possible = possibleMoves(gb, color);
 			
 			if(depth == traveldepth){
-				return getWeight(gb, last, depth, possibleMin - possible.size()); //go back up from here
+				return getWeight(gb, last, depth, possible.size()); //go back up from here
 			}
 
 			if(possible.isEmpty()){
@@ -295,6 +516,12 @@ public class HAL implements ReversiPlayer {
 			
 			for(int i = 0; i < possible.size(); i++){
 				test = gb.clone(); //make a new copy of the board
+
+				//should We prune
+				if(checkPrune(test, possible.get(i), (gb.countStones(color)+gb.countStones(othercolor)), color))
+					if(++i >= possible.size())
+						break;
+				
 				if(!test.checkMove(color, possible.get(i))) System.err.println(tab(depth)+"Whoops, move don't work"); //test the move
 				
 				test.makeMove(color, possible.get(i)); //make the move
@@ -323,6 +550,63 @@ public class HAL implements ReversiPlayer {
 			return max;
 		}
 		
+
+		/**
+		 * 
+		 * @param gb
+		 * @param alpha
+		 * @param beta
+		 * @param depth
+		 * @param color
+		 * @return
+		 * @throws RuntimeException
+		 */
+	private int endgamesearch(GameBoard gb, long start, int alpha, int beta, int depth, int color)  throws RuntimeException{
+			long timediff = System.currentTimeMillis()-start;
+			if(timediff > timeout-500){
+				throw new RuntimeException("time ran out");
+			}
+			int othercolor;
+			if(color == gb.GREEN) 
+				othercolor = gb.RED;
+			else 
+				othercolor = gb.GREEN;
+			
+			
+			if((gb.countStones(color)+gb.countStones(othercolor)) == 64 || depth == traveldepth){
+				if(gb.countStones(othercolor) == gb.countStones(color))
+					return 0; //draw
+				if(gb.countStones(othercolor) > gb.countStones(color))//go back up from here
+					return 1; //win
+				else
+					return -1; //lose
+			}
+			
+			GameBoard test = gb.clone();
+			ArrayList<Coordinates> possible = possibleMoves(test, color);
+			
+			boolean firstchild = true;
+			int score = alpha; // maybe not alpha;
+			
+			for(int i = 0; i< possible.size(); i++){
+				test.makeMove(color, possible.get(i));
+				if(firstchild){
+					firstchild = false;
+					score = -(endgamesearch(test, start, -beta, -alpha, depth+1, othercolor));
+				}else{
+					score = -(endgamesearch(test, start, -alpha-1, -beta-1, depth+1, othercolor));
+					if(alpha < score && score < beta)
+						score = -(endgamesearch(test, start, -beta, -beta-1, -score, othercolor));
+				}
+				if(score > alpha)
+					alpha = score;
+				if(alpha >= beta)
+					break;
+			}
+			return alpha;
+	}
+
+
 		/**
 		 * 
 		 * @param Gameboard gb
@@ -341,8 +625,21 @@ public class HAL implements ReversiPlayer {
 			if(corner != null){
 				return corner;
 			}
-			
+
 			int at = 0;
+			/*
+			if((gb.countStones(color)+gb.countStones(othercolor) + traveldepth) >= 64){
+				try{	
+					at = endgamesearch(gb.clone(), start, -1, 1, 0, this.color);
+				}catch(RuntimeException e){
+					traveldepth--;
+				}
+				at = Math.abs(at);
+				at = (at - at%1000)/1000;
+				return possible.get(at);
+			}
+			*/
+
 			
 			try{	
 				at = max(gb.clone(), start, -64, 64, 0, null);
@@ -367,8 +664,6 @@ public class HAL implements ReversiPlayer {
 				prevat = at;
 				timediff = System.currentTimeMillis() - start;
 			}
-
-
 			System.out.println("timediff: " + timediff + " traveldepth: " + traveldepth);
 			traveldepth = traveldepthtmp;
 			at = Math.abs(at);
