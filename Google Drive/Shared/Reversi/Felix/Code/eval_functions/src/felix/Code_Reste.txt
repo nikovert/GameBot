@@ -1,0 +1,59 @@
+//  /**
+//   * 
+//   * @param move The current field.
+//   * @param square The field where we started.
+//   * @param index Index of the direction table.
+//   * @return
+//   */
+//  private long getNextField(long field, int start, int index){
+//    if(field == 0){
+//      field = 1;
+//      if(flip_direction[start][index] == 8)
+//        field = field << 7;
+//      else if(flip_direction[start][index] == 9)
+//        field = field << 8;
+//    }
+//    
+//    else{
+//     if(flip_direction[start][index] < 1)
+//       field = field >> flip_direction[start][index];
+//     else
+//       field = field << flip_direction[start][index];
+//    }
+//    return field;
+//  }
+
+
+//  /**
+//   * Resets the the number of moves already requested for this stage of the game.
+//   */
+//  private void reset_generation(){
+//    move_number[disks_played] = 0;
+//  }
+
+
+//  /**
+//   * 
+//   * @param field The field to check whether it is used by the opponent.
+//   * @param player The current player.
+//   * @return True if this field is used by the opponent, false otherwise.
+//   */
+//  private boolean isOpp(long field, int player){
+//    if(player == RED)
+//      return ((field & board_green) > 0 ); 
+//    else
+//      return ((field & board_red) > 0 );
+//  }
+//  
+//  /**
+//   * 
+//   * @param field The field to check whether it is used by the opponent.
+//   * @param player The current player.
+//   * @return True if this field is used by the player.
+//   */
+//  private boolean isPlayer(long field, int player){
+//    if(player == RED)
+//      return ((field & board_red) > 0 ); 
+//    else
+//      return ((field & board_green) > 0 );
+//  }
