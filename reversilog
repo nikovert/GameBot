@@ -1,0 +1,149 @@
+id=TestGame time=1495036051917 new game
+id=TestGame time=1495036051918 red=HAL.HALTemplate green=HAL.HALmobility2
+id=TestGame time=1495036053509 initialized
+id=TestGame time=1495036053848 Redmove=6,3
+id=TestGame time=1495036053870 Greenmove=3,3
+id=TestGame time=1495036053896 Redmove=null
+id=TestGame time=1495036053898 Red makes illegal move
+id=TestGame time=1495036081472 new game
+id=TestGame time=1495036081475 red=HAL.HALmobility2 green=HAL.HALmobility2
+id=TestGame time=1495036082749 initialized
+id=TestGame time=1495036082841 Redmove=6,3
+id=TestGame time=1495036082848 Greenmove=3,3
+id=TestGame time=1495036082879 Redmove=3,4
+id=TestGame time=1495036082887 Greenmove=3,5
+id=TestGame time=1495036082904 Redmove=2,2
+id=TestGame time=1495036082913 Greenmove=1,1
+id=TestGame time=1495036082927 Redmove=2,4
+id=TestGame time=1495036082941 Greenmove=1,3
+id=TestGame time=1495036082958 Redmove=1,4
+id=TestGame time=1495036082976 Greenmove=1,5
+id=TestGame time=1495036082993 Redmove=6,6
+id=TestGame time=1495036083011 Greenmove=2,3
+id=TestGame time=1495036083046 Redmove=3,6
+id=TestGame time=1495036083088 Greenmove=3,7
+id=TestGame time=1495036083106 Redmove=2,5
+id=TestGame time=1495036083116 Greenmove=1,6
+id=TestGame time=1495036083130 Redmove=3,8
+id=TestGame time=1495036083152 Greenmove=4,6
+id=TestGame time=1495036083169 Redmove=5,6
+id=TestGame time=1495036083181 Greenmove=4,7
+id=TestGame time=1495036083196 Redmove=4,8
+id=TestGame time=1495036083204 Greenmove=5,3
+id=TestGame time=1495036083212 Redmove=4,3
+id=TestGame time=1495036083221 Greenmove=5,2
+id=TestGame time=1495036083236 Redmove=4,1
+id=TestGame time=1495036083247 Greenmove=5,7
+id=TestGame time=1495036083253 Redmove=5,8
+id=TestGame time=1495036083275 Greenmove=2,8
+id=TestGame time=1495036083284 Redmove=1,8
+id=TestGame time=1495036083291 Greenmove=6,1
+id=TestGame time=1495036083299 Redmove=5,1
+id=TestGame time=1495036083314 Greenmove=3,1
+id=TestGame time=1495036083319 Redmove=4,2
+id=TestGame time=1495036083335 Greenmove=6,2
+id=TestGame time=1495036083355 Redmove=1,2
+id=TestGame time=1495036083366 Greenmove=3,2
+id=TestGame time=1495036083377 Redmove=1,7
+id=TestGame time=1495036083393 Greenmove=6,4
+id=TestGame time=1495036083399 Redmove=2,1
+id=TestGame time=1495036083416 Greenmove=6,7
+id=TestGame time=1495036083426 Redmove=2,6
+id=TestGame time=1495036083434 Greenmove=2,7
+id=TestGame time=1495036083442 Redmove=6,5
+id=TestGame time=1495036083467 Greenmove=7,4
+id=TestGame time=1495036083473 Redmove=6,8
+id=TestGame time=1495036083488 Greenmove=7,6
+id=TestGame time=1495036083498 Redmove=7,1
+id=TestGame time=1495036083504 Greenmove=8,1
+id=TestGame time=1495036083511 Redmove=7,2
+id=TestGame time=1495036083518 Greenmove=7,3
+id=TestGame time=1495036083526 Redmove=7,5
+id=TestGame time=1495036083534 Greenmove=7,7
+id=TestGame time=1495036083579 Redmove=8,8
+id=TestGame time=1495036083586 Greenmove=7,8
+id=TestGame time=1495036083602 Redmove=8,2
+id=TestGame time=1495036083616 Greenmove=8,3
+id=TestGame time=1495036083625 Redmove=8,4
+id=TestGame time=1495036083636 Greenmove=8,5
+id=TestGame time=1495036083652 Redmove=8,6
+id=TestGame time=1495036083660 Greenmove=8,7
+id=TestGame time=1495036083667 finished reds=32 greens=32
+id=TestGame time=1495036097678 new game
+id=TestGame time=1495036097678 red=HAL.HALmobility2 green=HAL.HALmobility2
+id=TestGame time=1495036098857 initialized
+id=TestGame time=1495036098941 Redmove=6,3
+id=TestGame time=1495036098976 Greenmove=3,3
+id=TestGame time=1495036099005 Redmove=3,4
+id=TestGame time=1495036099017 Greenmove=3,5
+id=TestGame time=1495036099026 Redmove=2,2
+id=TestGame time=1495036099035 Greenmove=1,1
+id=TestGame time=1495036099045 Redmove=2,4
+id=TestGame time=1495036099051 Greenmove=1,3
+id=TestGame time=1495036099059 Redmove=1,4
+id=TestGame time=1495036099069 Greenmove=1,5
+id=TestGame time=1495036099078 Redmove=2,6
+id=TestGame time=1495036099093 Greenmove=2,3
+id=TestGame time=1495036099100 Redmove=3,2
+id=TestGame time=1495036099116 Greenmove=4,1
+id=TestGame time=1495036099126 Redmove=1,2
+id=TestGame time=1495036099141 Greenmove=2,5
+id=TestGame time=1495036099165 Redmove=1,6
+id=TestGame time=1495036099170 Greenmove=1,7
+id=TestGame time=1495036099180 Redmove=2,1
+id=TestGame time=1495036099197 Greenmove=3,1
+id=TestGame time=1495036099208 Redmove=2,7
+id=TestGame time=1495036099214 Greenmove=2,8
+id=TestGame time=1495036099228 Redmove=3,6
+id=TestGame time=1495036099234 Greenmove=3,7
+id=TestGame time=1495036099242 Redmove=1,8
+id=TestGame time=1495036099251 Greenmove=3,8
+id=TestGame time=1495036099261 Redmove=4,3
+id=TestGame time=1495036099268 Greenmove=4,2
+id=TestGame time=1495036099279 Redmove=4,8
+id=TestGame time=1495036099286 Greenmove=4,6
+id=TestGame time=1495036099298 Redmove=5,3
+id=TestGame time=1495036099305 Greenmove=5,2
+id=TestGame time=1495036099318 Redmove=5,1
+id=TestGame time=1495036099327 Greenmove=6,1
+id=TestGame time=1495036099353 Redmove=4,7
+id=TestGame time=1495036099361 Greenmove=5,6
+id=TestGame time=1495036099371 Redmove=6,2
+id=TestGame time=1495036099379 Greenmove=5,7
+id=TestGame time=1495036099385 Redmove=5,8
+id=TestGame time=1495036099394 Greenmove=6,4
+id=TestGame time=1495036099405 Redmove=6,5
+id=TestGame time=1495036099429 Greenmove=6,6
+id=TestGame time=1495036099444 Redmove=6,7
+id=TestGame time=1495036099482 Greenmove=6,8
+id=TestGame time=1495036099522 Redmove=7,2
+id=TestGame time=1495036099548 Greenmove=8,1
+id=TestGame time=1495036099554 Redmove=7,3
+id=TestGame time=1495036099565 Greenmove=7,1
+id=TestGame time=1495036099573 Redmove=7,4
+id=TestGame time=1495036099593 Greenmove=7,5
+id=TestGame time=1495036099602 Redmove=7,6
+id=TestGame time=1495036099615 Greenmove=7,7
+id=TestGame time=1495036099632 Redmove=8,8
+id=TestGame time=1495036099652 Greenmove=7,8
+id=TestGame time=1495036099662 Redmove=8,2
+id=TestGame time=1495036099678 Greenmove=8,3
+id=TestGame time=1495036099693 Redmove=8,4
+id=TestGame time=1495036099699 Greenmove=8,5
+id=TestGame time=1495036099704 Redmove=8,6
+id=TestGame time=1495036099709 Greenmove=8,7
+id=TestGame time=1495036099715 finished reds=21 greens=43
+id=TestGame time=1495036172816 new game
+id=TestGame time=1495036172817 red=HAL.HALmobility2 green=HAL.HALmobility2
+id=TestGame time=1495036173988 initialized
+id=TestGame time=1495036178369 Redmove=6,4
+id=TestGame time=1495036182501 Greenmove=3,5
+id=TestGame time=1495036184618 quit button pressed
+id=TestGame time=1495036361393 new game
+id=TestGame time=1495036361394 red=HAL.HALTemplate green=HAL.HALmobility2
+id=TestGame time=1495036362602 initialized
+id=TestGame time=1495036362749 Redmove=6,3
+id=TestGame time=1495036362771 Greenmove=3,3
+id=TestGame time=1495036362800 Redmove=null
+id=TestGame time=1495036362801 Red makes illegal move
+id=TestGame time=1495036453789 quit button pressed
