@@ -28,26 +28,33 @@ public class Eval {
 	 */
 	private int getWeight(BitBoard board, int player) {
 
-		double diff = 0.5;
+		//number of disc advantage
+		int stones = (board.countStones(player)-board.countStones(2-player));
+		
+		//static Analysis advantage
+		int sA =  anal.staticAnalysis(board.lastmove);
+		
+		//mobility advantage
+		board.generate_all(player);
+		int mobility = board.getAllMoves().length;
+				
+		//calculate Coefficients 
+		double dA = -0.5;
 		
 		//if early game
-		if((board.disks_played+4) < 40)
-			diff = -2*diff;
+		if((board.disks_played+4) < 40){
+			dA = -2*dA;
+		}
 		
 		//if end game
-		if((board.disks_played+4) > 55)
-			diff = 3*diff;
+		if((board.disks_played+4) > 55){
+			dA = 3*dA;
+		}
+	
 		
-		//number of tiles
-		int stones = (int) ((board.disks_played+4)*diff);
+		//System.out.println("BitHAL: stones: " + stones + " sa: " + sA + " mobility: " + mobility);
 		
-		int sA =  anal.staticAnalysis(board, player) * 3;
-		
-		int m =  board.getAllMoves().length;
-		
-		System.out.println("stones: " + stones + " sa: " + sA + " m: " + m);
-		
-		return m+sA+stones;
+		return (int) (sA + stones * dA + mobility);
 		
 	}
 	

@@ -2,46 +2,6 @@ package HALclean;
 
 
 public class StaticAnalysis {
-	
-    static final int GREENSQ = GameConstants.GREENSQ;
-    static final int EMPTY = GameConstants.EMPTY;
-    static final int REDSQ = GameConstants.REDSQ;
-    private int opponent;
-
-	/**
-	 * May be used by the evaluation function to get a value how the advantage of the entire board
-	 * @param board
-	 * @param player
-	 * @return the advantage of the player
-	 */
-	 protected int staticAnalysis(BitBoard board, int player){
-		 int advantage = 0, opponentadvantage = 0;
-		 int discs = 0, opponentdiscs = 0; //counts the disc owned by a player
-		 
-		 if(player == REDSQ)
-			 opponent = GREENSQ;
-		 else
-			 opponent = REDSQ;
-		 
-		  for(int i = 1; i <= 8; i++){
-			  for(int j = 1; j <= 8; j++){
-				  if(board.board[i][j] == player){
-					  advantage += getValue(i,j, player);
-					  discs++;
-				  }/*
-				  else
-					  if(board.board[i][j] != EMPTY){
-						  opponentadvantage += getValue(i,j, opponent);
-						  opponentdiscs++;
-					  }
-				   */
-			  }
-	 		}
-		  advantage = advantage/discs;
-		  //opponentadvantage = opponentadvantage/opponentdiscs;
-		  
-		  return advantage;
-	  }
 
 	 /*weight of fields:
 	 100  -8  8  6  6  8  -8 100
@@ -53,7 +13,13 @@ public class StaticAnalysis {
 	 -8  -24 -4 -3 -3 -4 -24 -8
 	 100   -8  8  6  6  8  -8 100
 	*/
-	private int getValue(int col, int row, int player) {
+    /**
+     * @param the last made move
+     * @return the value of the move, based on a static analysis
+     */
+	protected int staticAnalysis(int square) {
+		int col = (square % 10);
+		int row = (square / 10);
 		switch (col){
 			case 1: col = 8;
 			case 8: 

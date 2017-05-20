@@ -181,7 +181,7 @@ public class HALmobility2 implements ReversiPlayer {
 					weight += 0;
 			}
 			
-			//System.out.println("weight: " + weight);
+			//System.out.println("mobilityHAL: stones: " + (gb.countStones(color)-gb.countStones(othercolor))*diff + " sa: " + 0 + " mobility: " + mobility);
 			
 			return weight;
 		}

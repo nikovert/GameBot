@@ -5,6 +5,7 @@ public class NegaScout {
   // Class objects
   private final BitBoard board;
   private final Eval eval;
+  private final Prune prune;
   
   // Constants
   private int MAXDEPTH;
@@ -37,6 +38,7 @@ public class NegaScout {
     // Class objects
     this.board = board;
     eval = new Eval();
+    prune = new Prune();
     
     // Timing
     this.timeout = timeout;
@@ -159,13 +161,16 @@ public class NegaScout {
 	 return t;
     }
     
-    /*
-     * need to add call of method checkPrune!
-     */
       
     // Multiple moves
     for(int j = 0; j < Moves.length; ++j){
-     
+    	//should we prune
+    	if(prune.checkPrune(board, Moves[j], player)){
+				if(++j >= Moves.length){
+					break;
+				}
+    	}
+    	
       // First search with open window.
       board.make_move(Moves[0], player);
       ++move_counter;

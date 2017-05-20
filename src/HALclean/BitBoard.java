@@ -25,8 +25,6 @@ public class BitBoard {
   private final int RED;
 
   // Patterns&Tables
-  private int move_number[]; // The number of moves requested so far for a
-                             // certain stage of the game.
   private final int move_check_order[]; // The order in which GameBoard fields
                                         // are checked whether they offer a
                                         // valid move.
@@ -35,6 +33,8 @@ public class BitBoard {
                                         // flips. For each field.
 
   // Game-Tables
+  private int move_number[]; // The number of moves requested so far for a
+  							// certain stage of the game.
   private final int move_list[][]; // Holds all possible moves for every stage
                                    // of the game.
   private int move_count[]; // Holds the number of possible moves for every
@@ -51,6 +51,7 @@ public class BitBoard {
   // Game information
   protected int disks_played;
   protected int board[][];
+  protected int lastmove; //saves the last made move, can only be used during eval, as it is not always updated!
 
   /**
    * Constructor
@@ -190,6 +191,9 @@ public class BitBoard {
     stonesSet = Long.bitCount(green) + Long.bitCount(red);
 
     setStones(square, player);
+    
+    //save in lastmove
+    lastmove = square;
 
     green = toBitBoard(GREEN);
     red = toBitBoard(RED);
