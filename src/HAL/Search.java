@@ -1,231 +1,191 @@
 package HAL;
 
+import java.util.Arrays;
+
+import reversi.GameBoard;
+
 public class Search {
-  
-  //Class objects
-  private Eval eval;
-  private BitBoard board;
+
+  // Class objects
+  private final BitBoard board;
+  private final NegaScout scout;
 
   // Constants
-   private final static int passvalue = -64;
-   private long timeout = 500;
-  // private int maxdepth;
-   private int traveldepth = 7;
-   
-   // Game information
-   private int player;
-   private int opponent;
-   
-   
-   /**
-    * Constructor
-    * 
-    */
-   Search(BitBoard board, int player, int opponent){
-     
-     //Class objects
-     eval = new Eval();
-     this.board = board;
-     
-     // Game information
-     this.player = player;
-     this.opponent = opponent;
-   }
+  private final int MAXDEPTH;
+
+  // Game information
+  private final int PLAYER;
+  private final int OPPONENT;
+  private Pair[] Pairs;
+
+  
+  /**
+   * Constructor
+   * 
+   */
+  Search(long timeout, BitBoard board, int player, int opponent) {
+
+    // Class objects
+    this.board = board;
+    scout = new NegaScout(board, timeout, player, opponent);
+
+    // Constants
+    MAXDEPTH = GameConstants.MAXDEPTH;
+
+    // Game information
+    this.PLAYER = player;
+    this.OPPONENT = opponent;
+  }
 
   
   /**
    * 
-   * @param possibleMoves An array containing all moves available.
-   * @param start The time we started our search.
-   * @param board The board.
-   * @return
+   * @author felixcrazzolara
    * 
-   * Main function to search the best move. Uses iterative deepening.
+   *         Local class used to sort moves with their values.
    * 
    */
-  public SearchResults deepen(int[] possibleMoves, long start, BitBoard board) {
-    
-    int at = 0;
-    try {
-      at = max(start, -64, 64, 0, 0, possibleMoves.length);
-    } catch (RuntimeException e) {
-      traveldepth--;
+  private class Pair implements Comparable<Pair> {
+
+    // Search information
+    private int move;
+    private int value;
+
+    public int compareTo(Pair p) {
+      if (value > p.value)
+        return 1;
+      else
+        return -1;
+    }
+  }
+
+  
+  /**
+   * 
+   * @return Returns an object of search results containing all information
+   *         about this search.
+   * 
+   *         Main function to search the best move. Uses iterative deepening.
+   * 
+   */
+  public SearchResults deepen(GameBoard gb) {
+
+    // Timing
+    long start = System.currentTimeMillis();
+
+    // Update board
+    board.update_opp_move(gb);
+
+    // Generate all moves
+    board.generate_all(PLAYER);
+    int[] moves = board.getAllMoves();
+
+    // Initialize Pairs
+    Pairs = new Pair[moves.length];
+    for(int i = 0; i < Pairs.length; ++i)
+      Pairs[i] = new Pair();
+    for (int i = 0; i < moves.length; ++i)
+      Pairs[i].move = moves[i];
+    for (int i = 0; i < Pairs.length; ++i)
+      Pairs[i].value = Integer.MIN_VALUE;
+
+    // Check for pass
+    if (Pairs.length == 0) {
+      board.pass();
+      SearchResults info = new SearchResults();
+      info.bestMove = null;
+      info.maxDepth = 1;
+      info.timediff = System.currentTimeMillis() - start;
+      return info;
     }
 
-    /*
-     * go as deep as possible
-     */
-    long timediff = System.currentTimeMillis() - start;
-    int traveldepthtmp = traveldepth;
-    int prevat = at;
+    // Single move possible
+    if (Pairs.length == 1) {
+      board.make_move(Pairs[0].move, PLAYER);
+      SearchResults info = new SearchResults();
+      info.bestMove = board.ArraytoCoordinate(Pairs[0].move);
+      info.maxDepth = 1;
+      info.timediff = System.currentTimeMillis() - start;
+      return info;
+    }
 
-    while (timediff < (timeout - 1000)) {
-      traveldepth++;
+    ////// Iterative deepening //////
+
+    // Save default move to prevent ugly errors if everything fails.
+    int bestMove = Pairs[0].move;
+    
+    // NegaScout
+    scout.initialize(start);
+
+    // Debug
+    scout.node_counter = 0;
+    
+    // Iterative search
+    for (int d = 1; d <= MAXDEPTH; ++d) {
+
+      // Get best move.
       try {
-        at = max(start, -64, 64, 0, 0, possibleMoves.length);
-      } catch (RuntimeException e) {
-        at = prevat;
-        timediff = System.currentTimeMillis() - start;
-        traveldepth--;
+        bestMove = search(d);
+      } catch (OutOfTimeException e) {
+        bestMove = Pairs[Pairs.length - 1].move;
         break;
       }
-      prevat = at;
-      timediff = System.currentTimeMillis() - start;
     }
     
+    // Debug
+    System.out.println("Node_Counter is: " + scout.node_counter);
+    
+    // Make best move.
+    board.make_move(bestMove, PLAYER);
 
-    traveldepth = traveldepthtmp;
-    at = Math.abs(at);
-    at = (at - at % 1000) / 1000;
-    
-    System.out.println("Move is: " + possibleMoves[at]);
-    
-    ////    Search-Information    ////
+    //// Search-Information ////
     SearchResults info = new SearchResults();
-    info.bestMove = board.ArraytoCoordinate(possibleMoves[at]);
-    info.traveldepth = traveldepth;
-    info.timediff = timediff;
+    info.bestMove = board.ArraytoCoordinate(bestMove);
+    info.maxDepth = scout.getMaxDepthReached();
+    info.timediff = System.currentTimeMillis() - start;
 
     return info;
   }
+
   
-
   /**
    * 
-   * @param the
-   *          Gameboard
-   * @param the
-   *          start time
-   * @param alpha
-   *          value
-   * @param beta
-   *          value
-   * @param depth
-   *          the depth (used to see how deep we go)
-   * @param last
-   *          (the last made move)
+   * @param currentdepth The maximum depth to search.
    * @return
    */
-  int min(long start, int alpha, int beta, int depth, int lastCoordinate, int lastmovescount) throws RuntimeException {
-    long timediff = System.currentTimeMillis() - start;
-    if (timediff > timeout - 500) {
-      throw new RuntimeException("time ran out");
-    }
+  private int search(int currentdepth) {
+    boolean interrupted = false;
+    
+    try {
 
-    if (depth == traveldepth) {
-      return eval.getWeight(board, lastCoordinate, depth, lastmovescount);
-    }
+      // Needed to undo moves.
+      scout.resetCounter();
+      scout.setMaximumDepth(currentdepth);
 
-    board.generate_all(opponent);
-    int[] possible = board.getAllMoves();
-
-    if (possible.length == 0) {
-      return passvalue;
-    }
-
-    // GameBoard test;
-    int min = beta, at = 0, tmp = 0;
-
-    for (int i = 0; i < possible.length; i++) {
-
-      // should we prune
-      if (eval.checkPrune(board, possible[i], (board.countStones(player) + board.countStones(opponent)), opponent)) {
-        if (++i >= possible.length) {
-          break;
-        }
+      // Compute for each move it's negamax value using NegaScout.
+      for (int i = Pairs.length - 1; i >= 0; --i) {
+        board.make_move(Pairs[i].move, PLAYER);
+        Pairs[i].value = scout.negascout(Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
+        board.undo_move();
       }
-
-      board.make_move(possible[i], opponent); // make the move
-      tmp = max(start, alpha, min, depth + 1, possible[i], possible.length);
-
-      tmp = tmp % 1000;
-      if (tmp < min) { // see if the move is good
-        min = tmp; // save the move if it is
-        at = i;
-        if (min <= alpha) {
-          break;
-        }
-      }
-      board.undo_move();
+    } catch (OutOfTimeException e) {
+      
+      // Undo all moves that haven't been undone yet.
+      for (int i = 0; i < 1 + e.movecounter; ++i)
+        board.undo_move();
+      
+      interrupted = true;
+    } finally {
+      
+      // Sort all moves according to their values.
+      Arrays.sort(Pairs);
+      
+      // If the search was interrupted throw another exception.
+      if(interrupted) throw new OutOfTimeException();
     }
-    min = min % 1000;
-    if (min < 0) {
-      min = min * (-1);
-      min = at * 1000 + min; // add at to the number
-      min = min * (-1);
-    } else {
-      min = at * 1000 + min; // add at to the number
-    }
-
-    return min;
+    
+    // Return the best move found.
+    return Pairs[Pairs.length - 1].move;
   }
-
-  /**
-   * 
-   * @param the
-   *          Gameboard
-   * @param the
-   *          start time
-   * @param alpha
-   *          value
-   * @param beta
-   *          value
-   * @param depth
-   *          the depth (used to see how deep we go)
-   * @param last
-   *          (the last made move)
-   * @return
-   */
-  int max(long start, int alpha, int beta, int depth, int lastCoordinate, int lastmovescount) throws RuntimeException {
-    long timediff = System.currentTimeMillis() - start;
-    if (timediff > timeout - 500) {
-      throw new RuntimeException("time ran out");
-    }
-
-    if (depth == traveldepth) {
-      return eval.getWeight(board, lastCoordinate, depth, lastmovescount);
-    }
-
-    int[] possible = board.getAllMoves();
-
-    if (possible.length == 0) {
-      return passvalue;
-    }
-
-    int max = alpha, at = 0, tmp = 0;
-
-    for (int i = 0; i < possible.length; i++) {
-
-      // should We prune
-      if (eval.checkPrune(board, possible[i], (board.countStones(player) + board.countStones(opponent)), player)) {
-        if (++i >= possible[i]) {
-          break;
-        }
-      }
-
-      board.make_move(possible[i], player); // make the move
-      tmp = min(start, max, beta, depth + 1, possible[i], possible.length);
-
-      tmp = tmp % 1000;
-      if (tmp > max) { // see if the move is good
-        max = tmp; // save the move if it is
-        at = i;
-        if (max >= beta) {
-          break;
-        }
-      }
-      board.undo_move();
-    }
-    max = max % 1000;
-    if (max < 0) {
-      max = max * (-1);
-      max = at * 1000 + max; // add at to the number
-      max = max * (-1);
-    } else {
-      max = at * 1000 + max; // add at to the number
-    }
-
-    return max;
-  }
-
+  
 }

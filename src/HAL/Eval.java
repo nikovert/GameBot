@@ -5,7 +5,10 @@ import reversi.GameBoard;
 import reversi.OutOfBoundsException;
 
 public class Eval {
-
+  
+  protected int evaluate(int player){
+    return 0;
+  }
 
 	/**
 	 * 

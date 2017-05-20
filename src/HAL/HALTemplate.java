@@ -11,10 +11,17 @@ public class HALTemplate implements ReversiPlayer {
   private BitBoard board;
   private Search search;
 
+  // Timing
+  private long timeout;
+  
   // Game information
   private int player;
   private int opponent;
-
+  
+  // Debug
+  int player_reversi;
+  
+  
   /**
    * Konstruktor, der bei der Gründung eines Bots eine Meldung auf den
    * Bildschirm ausgibt.
@@ -23,35 +30,44 @@ public class HALTemplate implements ReversiPlayer {
     System.out.println("A.I. erstellt.");
   }
 
+  
   /**
    * Speichert die Farbe und den Timeout-Wert in Instanzvariablen ab. Diese
    * Methode wird vor Beginn des Spiels von {@link Arena} aufgerufen.
    * 
    * @see reversi.ReversiPlayer
    */
-  public void initialize(int player, long timeout) {
-
+  public void initialize(int player_reversi, long timeout) {
+    int opponent_reversi;
+    
+    // Debug
+    this.player_reversi = player_reversi;
+    
     // Player
-    if (player == reversi.GameBoard.RED) {
+    if (player_reversi == reversi.GameBoard.RED) {
       System.out.println("HALTemplate ist Spieler RED.");
-      this.player = GameConstants.RED;
+      player = GameConstants.RED;
     } else {
       System.out.println("HALTemplate ist Spieler GREEN.");
-      this.player = GameConstants.GREEN;
+      player = GameConstants.GREEN;
     }
 
     // Opponent player
-    if (player == reversi.GameBoard.RED)
-      opponent = reversi.GameBoard.GREEN;
-    else
-      opponent = reversi.GameBoard.RED;
+    if (player_reversi == reversi.GameBoard.RED){
+      opponent = GameConstants.GREEN;
+      opponent_reversi = reversi.GameBoard.GREEN;
+    }
+    else{
+      opponent = GameConstants.RED;
+      opponent_reversi = reversi.GameBoard.RED;
+    }
 
-    // Timeout
-    // this.timeout = timeout;
+    // Timing
+    this.timeout = timeout;
 
-    // Initialize class objects
-    board = new BitBoard(this.player, player, opponent);
-    search = new Search(board, player, opponent);
+    // Class objects
+    board = new BitBoard(player, player_reversi, opponent_reversi);
+    search = new Search(timeout, board, player, opponent);
   }
 
   
@@ -63,22 +79,8 @@ public class HALTemplate implements ReversiPlayer {
    */
   public Coordinates nextMove(GameBoard gb) {
 
-    // Timing
-    long start = System.currentTimeMillis();
-
-    // Update board
-    board.update_opp_move(gb);
-
-    //// Check for pass ////
-    board.generate_all(player);
-    int[] possibleMoves = board.getAllMoves();
-
-    if (possibleMoves.length == 0) {
-      return null;
-    }
-
     //// Use iterative deepening ////
-    SearchResults info = search.deepen(possibleMoves, start, board);
+    SearchResults info = search.deepen(gb);
 
     ////    Log-Info    ////
     System.out.print("HAL ");
@@ -87,8 +89,11 @@ public class HALTemplate implements ReversiPlayer {
     } else if (player == GameConstants.GREEN) {
       System.out.print("(GREEN) ");
     }
-
-    System.out.println("timediff: " + info.timediff + " traveldepth: " + info.traveldepth);
+    System.out.println("timediff: " + info.timediff + " maxDepth: " + info.maxDepth);
+    
+    if(!gb.checkMove(player_reversi, info.bestMove)){
+      throw new RuntimeException();
+    }
     
     return info.bestMove;
   }

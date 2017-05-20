@@ -4,16 +4,25 @@ public class GameConstants {
   
   // Game Settings
   static final int ILLEGAL = -1;
-  static final int GREENSQ = 0; //changed from 0 to 2
-  static final int EMPTY = 1; //changed from 1 to 0
-  static final int REDSQ = 2; //changed from 2 to 1
+  static final int GREENSQ = 0;
+  static final int EMPTY = 1;
+  static final int REDSQ = 2;
   static final int OUTSIDE = 3;
-  static final int GREEN = 0; //changed from 0 to 2
-  static final int RED = 2; //changed from 2 to 1
+  static final int GREEN = 0;
+  static final int RED = 2;
+  static final int NORMAL_MOVE = 0;
+  static final int PASS = -1;
   
   // Constants
-  static final int MOVE_ORDER_SIZE = 60;
-  static final int MAX_SEARCH_DEPTH = 60;
+  static final int MOVE_ORDER_SIZE = 61;
+  static final int MAX_SEARCH_DEPTH = 61;
+  static final int MOVE_STACK_SIZE = 128;
+  
+  // Search
+  static final int MAXDEPTH = 30;
+  
+  // Timing
+  static final long TIMEBUFFER = 200;
   
   // Patterns
   static final int position_list[] = {

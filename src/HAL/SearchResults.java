@@ -6,7 +6,7 @@ public class SearchResults {
   
   // General information about the search
   long timediff;
-  int traveldepth;
+  int maxDepth;
   Coordinates bestMove;
 
 }

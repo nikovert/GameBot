@@ -40,7 +40,7 @@ public class HALmobility2 implements ReversiPlayer {
 			traveldepth = 6;
 			this.timeout = timeout;
 			//if(timeout > 5000)
-				this.timeout = 500;         //// ACHTUNG 
+				this.timeout = 2000;         //// ACHTUNG 
 			this.color = color;
 			if (color == GameBoard.RED)
 			{
